@@ -46,7 +46,7 @@ class AppElement extends PolymerElement {
         }));
       }
 
-      grid.setup(dataProvider: data, columns: columns, gridOptions: gridOptions);
+      grid.setup(dataProvider: data, columns: columns, gridOptions: gridOptions) ;
 
     } on NoSuchMethodError catch (e) {
       print('$e\n\n${e.stackTrace}');
@@ -61,8 +61,9 @@ class AppElement extends PolymerElement {
 
   void reattach() {
     grid.remove();
-    new async.Future.delayed(new Duration(seconds: 2), () {
+    new async.Future.delayed(new Duration(seconds: 1), () {
       ($['grid_container'] as dom.Element).append(grid);
+      grid.setColumns = (columns);
       grid.render();
     });
   }
