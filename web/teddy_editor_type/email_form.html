@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+
+<link rel="import" href="../../../packages/polymer/polymer.html">
+
+<link rel='import' href='../../../packages/bwu_datagrid/bwu_datagrid.html'>
+
+<link rel="import" href="../../../packages/paper_elements/paper_input.html">
+<link rel="import" href="../../../packages/paper_elements/paper_icon_button.html">
+<link rel="import" href="../../../packages/core_elements/core_collapse.html">
+<link rel="import" href="../../../packages/core_elements/communication_icons.html">
+
+<polymer-element name='email-form'>
+
+<template>
+  <style>
+    #grid {
+      width: 300px;
+      height: 200px;
+    }
+
+  </style>
+
+  <div class='parent-container' on-mouseout='{{publishInstance}}'>
+    <paper-icon-button
+        id='add-btn'
+        class='margin-l-t-r-2'
+        label='{{label}}'
+        icon="{{icon}}"
+        on-click='{{toggle}}'>
+    </paper-icon-button>
+
+    <!--<core-collapse id="core-collapse">-->
+      <div layout vertical
+           class='sibling-container'>
+
+        <bwu-datagrid id="grid" on-keyUp='{{validateInstance}}'></bwu-datagrid>
+
+      </div>
+    <!-- </core-collapse> -->
+
+  </div>
+</template>
+
+<script type="application/dart" src="email_form.dart"></script>
+</polymer-element>

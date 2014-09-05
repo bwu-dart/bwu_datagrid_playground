@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<link rel="import" href="../../packages/polymer/polymer.html">
+<link rel='import' href='../../packages/bwu_datagrid/bwu_datagrid.html'>
+
+<polymer-element name='app-element'>
+  <template>
+    <style>
+      :host {
+        display: block;
+        width: 100%;
+      }
+      table {
+        width: 100%;
+      }
+    </style>
+    <button on-click="{{reattach}}">reattach</button>
+    <div id="grid_container">
+      <bwu-datagrid id='myGrid' style='width:600px;height:500px;'></bwu-datagrid>
+    </div>
+  </template>
+  <script type='application/dart' src='app_element.dart'></script>
+</polymer-element>

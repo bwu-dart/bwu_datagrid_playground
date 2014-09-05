@@ -1,0 +1,27 @@
+name: bwu_datagrid_playground
+version: 0.0.1
+author: Günter Zöchbauer <guenter@gzoechbauer.com>
+description: Try different things with BWU Datagrid
+homepage: https://github.com/bwu-dart/bwu_datagrid_playground
+environment:
+  sdk: '>=1.0.0 <2.0.0'
+
+dependencies:
+  polymer: '>=0.12.0-dev <0.14.0'
+  bwu_datagrid:
+    path: ../bwu_datagrid
+  paper_elements: any
+  core_elements: any
+
+dev_dependencies:
+  unittest: any
+
+dependency_overrides:
+#  barback: '>= 0.14.0+3'
+#  analyzer: '>= 0.15.5'
+
+transformers:
+- polymer:
+    entry_points:
+    - web/teddy_editor_type/index.html
+    - web/issue97_re_attach/index.html
