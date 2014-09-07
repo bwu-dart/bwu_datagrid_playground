@@ -22,7 +22,7 @@ packages:
       path: "../bwu_datagrid"
       relative: true
     source: path
-    version: "0.0.15"
+    version: "0.0.16"
   bwu_sparkline:
     description: bwu_sparkline
     source: hosted

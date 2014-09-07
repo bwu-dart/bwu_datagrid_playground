@@ -9,10 +9,9 @@ import 'package:bwu_datagrid/datagrid/helpers.dart' show Column, GridOptions,
 MapDataItem, MapDataItemProvider;
 import 'package:bwu_datagrid/bwu_datagrid.dart' show BwuDatagrid;
 import 'package:bwu_datagrid/formatters/formatters.dart' show CheckmarkFormatter;
-import 'package:bwu_datagrid/editors/editors.dart' show CheckboxEditor,
-IntegerEditor, TextEditor, Validator, ValidationResult, EditorArgs;
+import 'package:bwu_datagrid/editors/editors.dart' as bwu;
 import 'package:bwu_datagrid/core/core.dart' show AddNewRow, ActiveCellChanged,
-ItemBase, ValidationError;
+ItemBase, ValidationError, EventType;
 import 'package:bwu_datagrid/plugins/row_selection_model.dart' show RowSelectionModel;
 
 //import 'package:epimss_podo/reg.dart' show Email, EMAIL_FORM_EVENT;
@@ -20,35 +19,51 @@ import 'package:bwu_datagrid/plugins/row_selection_model.dart' show RowSelection
 //import 'package:epimss_shared/validators.dart' show BwuRequiredEmailValidator,
 //BwuRequiredNounValidator;
 
-class BwuRequiredEmailValidator extends Validator {
-  ValidationResult call(dynamic value) {
-    if (value == null || (value is String && value.isNotEmpty && !value.contains('@'))) {
-      return new ValidationResult(false, 'This is not a valid email address');
+const String REQUIRED_EMAIL_REGEX = r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b";
+const String REQUIRED_NOUN_REGEX = r"\b[a-z'-]{2,}\b";
+
+final RegExp _requiredNounValidator = new RegExp( REQUIRED_NOUN_REGEX, caseSensitive: false );
+bool isRequiredNounValid( String property ) =>
+_requiredNounValidator.hasMatch( property );
+
+final RegExp _requiredEmailPropertyValidator = new RegExp( REQUIRED_EMAIL_REGEX, caseSensitive: false );
+bool isRequiredEmailPropertyValid( String property ) => _requiredEmailPropertyValidator.hasMatch( property );
+
+
+class BwuRequiredEmailValidator extends bwu.Validator {
+  bwu.ValidationResult call( dynamic value ) {
+    if ( isRequiredEmailPropertyValid( value ) ) {
+      return new bwu.ValidationResult( true );
     } else {
-      return new ValidationResult(true);
+      return new bwu.ValidationResult( false, 'Valid email address required.' );
     }
   }
 }
 
-class BwuRequiredNounValidator extends Validator {
-  ValidationResult call(dynamic value) {
-    if (value == null || (value is String && value.isNotEmpty && new RegExp('[A-Z]+.*').firstMatch(value) != null)) {
-      return new ValidationResult(false, 'The value must start with an upper case character');
+
+class BwuRequiredNounValidator extends bwu.Validator {
+  bwu.ValidationResult call( dynamic value ) {
+    if ( isRequiredNounValid( value) ) {
+      return new bwu.ValidationResult( true );
     } else {
-      return new ValidationResult(true);
+      return new bwu.ValidationResult( false, 'Valid noun is required.' );
     }
   }
 }
 
 //import 'package:jsonx/jsonx.dart';
 
-class AddressEditor extends TextEditor {
+class AddressEditor extends bwu.TextEditor {
+  static const VALIDATION_SUCCEEDED = const EventType<ValidationError>(
+      'custom-validation-succeeded');
+  AddressEditor() : super();
+
   @override
-  TextEditor newInstance(EditorArgs args) {
+  bwu.TextEditor newInstance(bwu.EditorArgs args) {
     return new AddressEditor._(args);
   }
 
-  AddressEditor._(EditorArgs args) {
+  AddressEditor._(bwu.EditorArgs args) {
     this.args = args;
     $input = new TextInputElement()
       ..classes.add('editor-text');
@@ -62,15 +77,29 @@ class AddressEditor extends TextEditor {
       ..focus()
       ..select();
   }
+
+  @override
+  bwu.ValidationResult validate() {
+    var result = super.validate();
+    args.grid.eventBus.fire(AddressEditor.VALIDATION_SUCCEEDED, new ValidationError(this,
+    editor: this,
+    cellNode: args.grid.getActiveCellNode(),
+    validationResults: result,
+    cell: args.grid.getActiveCell(),
+    column: column));
+    return result;
+  }
 }
 
-class TypeEditor extends TextEditor {
+class TypeEditor extends bwu.TextEditor {
+  TypeEditor() : super();
+
   @override
-  TextEditor newInstance(EditorArgs args) {
+  bwu.TextEditor newInstance(bwu.EditorArgs args) {
     return new AddressEditor._(args);
   }
 
-  TypeEditor._(EditorArgs args) {
+  TypeEditor._(bwu.EditorArgs args) {
     this.args = args;
     $input = new TextInputElement()
       ..classes.add('editor-text');
@@ -175,6 +204,7 @@ class EmailForm extends PolymerElement {
   }
 
   void validationErrorHandler(ValidationError e) {
+    //print ( e.validationResults.errors.length );
     errorMsg = e.validationResults.message;
     var editor = e.editor;
     print('valResult valid |' + e.validationResults.isValid.toString());
@@ -195,7 +225,7 @@ class EmailForm extends PolymerElement {
     if (editor != null) {
       //var colId = editor.column.id;
 
-      if (editor is TextEditor)
+      if (editor is bwu.TextEditor)
         print('editor is TEXTEDITOR');
 
       if (editor is TypeEditor) {
@@ -258,6 +288,7 @@ class EmailForm extends PolymerElement {
         .listen(validationErrorHandler);
         grid.onBwuActiveCellChanged
         .listen(activeCellChangedHandler);
+        grid.onBwuCellChange
       });
     }
     on NoSuchMethodError

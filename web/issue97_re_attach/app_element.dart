@@ -46,8 +46,11 @@ class AppElement extends PolymerElement {
         }));
       }
 
-      grid.setup(dataProvider: data, columns: columns, gridOptions: gridOptions) ;
+      dom.window.onResize.listen(grid.resizeCanvas);
 
+      grid.setup(dataProvider: data, columns: columns, gridOptions: gridOptions)
+      .then((_) => grid.onBwuAttached.listen((e) =>
+      grid.setColumns = grid.getColumns));
     } on NoSuchMethodError catch (e) {
       print('$e\n\n${e.stackTrace}');
     }  on RangeError catch (e) {
@@ -60,11 +63,12 @@ class AppElement extends PolymerElement {
   }
 
   void reattach() {
+
     grid.remove();
     new async.Future.delayed(new Duration(seconds: 1), () {
       ($['grid_container'] as dom.Element).append(grid);
-      grid.setColumns = (columns);
-      grid.render();
+      //grid.setColumns = (columns);
+      //grid.render();
     });
   }
 }
